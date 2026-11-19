@@ -577,7 +577,7 @@ impl NoIklanApp {
 
     fn top_home(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::top("top")
-            .exact_height(52.0 + self.safe_top)
+            .exact_height(52.0)
             .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 14.0, right: 6.0, top: 10.0 + self.safe_top, bottom: 4.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -613,7 +613,7 @@ impl NoIklanApp {
 
     fn top_back(&mut self, ctx: &egui::Context, pal: &Pal, title: &str, subtitle: Option<&str>) {
         egui::TopBottomPanel::top("top")
-            .exact_height(52.0 + self.safe_top)
+            .exact_height(52.0)
             .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0 + self.safe_top, bottom: 4.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -632,7 +632,7 @@ impl NoIklanApp {
 
     fn top_search(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::top("top")
-            .exact_height(56.0 + self.safe_top)
+            .exact_height(56.0)
             .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0 + self.safe_top, bottom: 6.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -669,7 +669,7 @@ impl NoIklanApp {
 
     fn bottom_nav(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::bottom("nav")
-            .exact_height(58.0 + self.safe_bottom)
+            .exact_height(58.0)
             .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 0.0, right: 0.0, top: 4.0, bottom: 2.0 + self.safe_bottom }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
