@@ -894,7 +894,7 @@ impl NoIklanApp {
                         let (r, resp) = ui.allocate_exact_size(vec2(56.0, 56.0), Sense::click());
                         self.draw_avatar(ui, r, name, [124, 92, 255], None);
                         if subbed {
-                            ui.painter_at(r).circle_stroke(r.center(), 28.0, Stroke::new(2.0, RED));
+                            ui.painter_at(r).circle_stroke(r.center(), 28.0, Stroke::new(2.0_f32, RED));
                         }
                         if resp.clicked() {
                             clicked = true;

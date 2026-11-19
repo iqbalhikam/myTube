@@ -132,10 +132,12 @@ fn from_renderer(vr: &Value) -> Option<Video> {
         .or_else(|| runs_text(&vr["longBylineText"]))
         .or_else(|| runs_text(&vr["shortBylineText"]))
         .unwrap_or_else(|| "YouTube".into());
+    let channel_slug = channel.to_lowercase().replace(' ', "-");
     let channel_id = vr["ownerText"]["runs"][0]["navigationEndpoint"]["browseEndpoint"]["browseId"]
         .as_str()
         .unwrap_or("")
         .to_string();
+    let channel_id = if channel_id.is_empty() { channel_slug } else { channel_id };
     let avatar = largest_thumb(&vr["channelThumbnailSupportedRenderers"]["channelThumbnailWithLinkRenderer"]["thumbnail"]);
     let duration = vr["lengthText"]["simpleText"].as_str().map(parse_dur).unwrap_or(0);
     let views_text = vr["viewCountText"]["simpleText"]
@@ -145,12 +147,16 @@ fn from_renderer(vr: &Value) -> Option<Video> {
         .to_string();
     let age = vr["publishedTimeText"]["simpleText"].as_str().unwrap_or("").to_string();
     let live = vr["badges"].to_string().contains("LIVE_NOW");
-    let meta = [views_text, age].iter().filter(|s| !s.is_empty()).cloned().collect::<Vec<_>>().join(" • ");
+    let meta = [views_text.as_str(), age.as_str()]
+        .into_iter()
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join(" • ");
     Some(Video {
         id: id.clone(),
         title,
         channel,
-        channel_id: if channel_id.is_empty() { channel.to_lowercase().replace(' ', "-") } else { channel_id },
+        channel_id,
         category: "YouTube".into(),
         duration,
         views: 0,
