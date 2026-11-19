@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag rilis (mis. v1.0.0)'
+        required: true
 
 permissions:
   contents: write
@@ -116,10 +121,10 @@ jobs:
       - name: Buat GitHub Release & upload APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "NoIklan ${{ github.ref_name }}"
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: "NoIklan ${{ inputs.tag || github.ref_name }}"
           body: |
-            ## 📱 NoIklan ${{ github.ref_name }}
+            ## 📱 NoIklan ${{ inputs.tag || github.ref_name }}
 
             Aplikasi YouTube tanpa iklan untuk Android, ditulis dalam Rust.
 
