@@ -83,7 +83,7 @@ pub fn install(ctx: &egui::Context) {
     if let Some(list) = fonts.families.get_mut(&FontFamily::Monospace) {
         list.push("roboto".to_owned());
     }
-    fonts.families.insert(FontFamily::Name("medium".into()), vec!["roboto-medium".to_owned()]);
-    fonts.families.insert(FontFamily::Name("icons".into()), vec!["material-icons".to_owned()]);
+    fonts.families.insert(FontFamily::Name("medium".into()), vec!["roboto-medium".to_owned(), "roboto".to_owned()]);
+    fonts.families.insert(FontFamily::Name("icons".into()), vec!["material-icons".to_owned(), "roboto".to_owned()]);
     ctx.set_fonts(fonts);
 }

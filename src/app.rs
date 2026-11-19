@@ -1531,7 +1531,7 @@ impl NoIklanApp {
             self.dialog = Some(Dialog::ConfirmClear);
         }
         ui.add_space(20.0);
-        ui.label(RichText::new("NoIklan v1.0.3 • Rust + egui").size(11.0).color(pal.muted));
+        ui.label(RichText::new("NoIklan v1.0.4 • Rust + egui").size(11.0).color(pal.muted));
         ui.label(RichText::new("Bukan aplikasi resmi YouTube. Video diputar di Brave.").size(11.0).color(pal.muted));
         ui.add_space(20.0);
     }

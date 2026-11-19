@@ -1,6 +1,6 @@
 [package]
 name = "noiklan"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
 description = "YouTube tanpa iklan untuk Android, ditulis dalam Rust"
 license = "MIT"
