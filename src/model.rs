@@ -22,6 +22,10 @@ pub struct Video {
     pub age: String,
     pub color: [u8; 3],
     pub custom: bool,
+    pub meta: Option<String>,
+    pub avatar: Option<String>,
+    #[serde(default)]
+    pub live: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -103,7 +107,7 @@ impl Default for State {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum Tab { Home, Search, Subs, Library }
+pub enum Tab { Home, Shorts, Subs, Library }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum LibraryTab { History, Playlists, Likes, WatchLater }
@@ -126,9 +130,4 @@ pub enum UndoAction {
     RestoreLike(String),
     RestoreWatchLater(String),
     RestoreState(Box<State>),
-}
-
-pub enum AsyncResult {
-    OEmbed { id: String, result: Result<Video, String> },
-    Sponsor { id: String, result: Result<Vec<Segment>, String> },
 }

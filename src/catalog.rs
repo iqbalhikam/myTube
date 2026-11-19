@@ -5,7 +5,7 @@ fn slug(s: &str) -> String {
 }
 
 fn v(id: &str, title: &str, channel: &str, category: &str, duration: u32, views: u64, age: &str, color: [u8; 3]) -> Video {
-    Video { id: id.into(), title: title.into(), channel: channel.into(), channel_id: slug(channel), category: category.into(), duration, views, age: age.into(), color, custom: false }
+    Video { id: id.into(), title: title.into(), channel: channel.into(), channel_id: slug(channel), category: category.into(), duration, views, age: age.into(), color, custom: false, meta: None, avatar: None, live: false }
 }
 
 pub fn videos() -> Vec<Video> {

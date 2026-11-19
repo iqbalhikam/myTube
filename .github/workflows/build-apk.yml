@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag rilis (mis. v1.0.0)'
+        description: 'Tag rilis (mis. v1.1.0)'
         required: true
+      publish:
+        description: 'Publish sebagai GitHub Release'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -119,20 +123,26 @@ jobs:
           path: ${{ steps.find_apk.outputs.apk_path }}
 
       - name: Buat GitHub Release & upload APK
+        if: ${{ github.event_name == 'push' || inputs.publish }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           name: "NoIklan ${{ inputs.tag || github.ref_name }}"
           body: |
-            ## 📱 NoIklan ${{ inputs.tag || github.ref_name }}
+            ## NoIklan ${{ inputs.tag || github.ref_name }}
 
             Aplikasi YouTube tanpa iklan untuk Android, ditulis dalam Rust.
+
+            ### Yang baru
+            - UI mengikuti YouTube: beranda rekomendasi, pencarian, Shorts, langganan, library
+            - Data asli dari YouTube (trending + pencarian) dan thumbnail asli
+            - Pemutaran lewat Brave dengan Shields aktif; fallback ke browser default
 
             ### Cara Install
             1. Download file `NoIklan.apk` di bawah
             2. Buka file APK di HP Android kamu
             3. Izinkan install dari sumber tidak dikenal jika diminta
-            4. Install & nikmati YouTube tanpa iklan! 🎉
+            4. Install lalu buka aplikasi
 
             ### Catatan
             - Pemutaran video via Brave (ad-block native)

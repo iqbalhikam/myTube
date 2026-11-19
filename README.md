@@ -47,6 +47,9 @@ cargo run --bin noiklan-desktop
 
 ## Catatan
 
+- Tampilan mengikuti YouTube: beranda rekomendasi, pencarian, Shorts, langganan, dan library.
+- Beranda dan hasil pencarian diambil langsung dari YouTube (trending + search, region Indonesia); thumbnail memakai `i.ytimg.com`. Katalog lokal hanya dipakai sebagai fallback saat offline.
 - Pemutaran video dilakukan oleh Brave agar iklan diblokir secara native oleh browser, bukan WebView HTML.
 - Jika Brave tidak terpasang, aplikasi jatuh kembali ke browser default.
 - Data lokal (playlist, riwayat, suka, langganan, pengaturan) disimpan sebagai JSON di direktori data aplikasi.
+- Workflow bisa dijalankan manual (`workflow_dispatch`) dengan `publish` dimatikan untuk sekadar memverifikasi build tanpa membuat GitHub Release.

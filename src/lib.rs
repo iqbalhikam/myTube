@@ -1,9 +1,11 @@
 mod app;
 mod brave;
 mod catalog;
+mod icons;
 mod model;
 mod sponsor;
 mod store;
+mod youtube;
 
 use std::path::PathBuf;
 use std::sync::OnceLock;

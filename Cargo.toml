@@ -1,6 +1,6 @@
 [package]
 name = "noiklan"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 description = "YouTube tanpa iklan untuk Android, ditulis dalam Rust"
 license = "MIT"
@@ -19,6 +19,7 @@ egui = "0.27.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 ureq = { version = "2.9", features = ["json"] }
+image = { version = "0.24", default-features = false, features = ["jpeg", "png", "webp"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
 android-activity = { version = "0.5", features = ["native-activity"] }
@@ -59,3 +60,23 @@ name = "android.permission.INTERNET"
 
 [[package.metadata.android.uses_permission]]
 name = "android.permission.ACCESS_NETWORK_STATE"
+
+# Android 11+ package visibility: tanpa ini Brave tidak terdeteksi / startActivity
+# ke paket Brave bisa gagal dan video jatuh ke browser default ber-iklan.
+[[package.metadata.android.queries.package]]
+name = "com.brave.browser"
+
+[[package.metadata.android.queries.package]]
+name = "com.brave.browser_beta"
+
+[[package.metadata.android.queries.package]]
+name = "com.brave.browser_nightly"
+
+[[package.metadata.android.queries.intent]]
+actions = ["android.intent.action.VIEW"]
+
+[[package.metadata.android.queries.intent.data]]
+scheme = "https"
+
+[[package.metadata.android.queries.intent.data]]
+scheme = "http"
