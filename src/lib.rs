@@ -23,6 +23,13 @@ pub fn run_desktop() -> Result<(), eframe::Error> {
 #[cfg(target_os = "android")]
 #[no_mangle]
 fn android_main(app: android_activity::AndroidApp) {
+    android_logger::init_once(
+        android_logger::Config::default()
+            .with_tag("NoIklan")
+            .with_max_level(log::LevelFilter::Debug),
+    );
+    std::panic::set_hook(Box::new(|info| log::error!("PANIC: {info}")));
+    log::info!("android_main start");
     if let Some(p) = app.internal_data_path() {
         let _ = DATA_DIR.set(p);
     }
@@ -34,5 +41,9 @@ fn android_main(app: android_activity::AndroidApp) {
         })),
         ..Default::default()
     };
-    eframe::run_native("NoIklan", options, Box::new(|cc| Box::new(app::NoIklanApp::new(cc)))).unwrap();
+    match eframe::run_native("NoIklan", options, Box::new(|cc| Box::new(app::NoIklanApp::new(cc)))) {
+        Ok(()) => log::warn!("run_native returned Ok"),
+        Err(e) => log::error!("run_native failed: {e}"),
+    }
+    log::warn!("android_main end");
 }
