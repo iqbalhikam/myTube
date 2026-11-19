@@ -20,27 +20,35 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK & NDK
+      - name: Download & Setup Android SDK dari nol
         run: |
-          # SDK sudah ada di runner, kita pakai path defaultnya
-          SDK_ROOT=/usr/local/lib/android/sdk
-          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          SDK_DIR="$HOME/android-sdk"
+          mkdir -p "$SDK_DIR/cmdline-tools"
 
-          # Install TANPA --sdk_root agar masuk ke lokasi yang sama
-          # dengan yang dibaca cargo-apk via ANDROID_SDK_ROOT
-          yes | $SDKMANAGER \
+          # Download Android command-line tools
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" \
+            -O /tmp/cmdline-tools.zip
+          unzip -q /tmp/cmdline-tools.zip -d "$SDK_DIR/cmdline-tools"
+          mv "$SDK_DIR/cmdline-tools/cmdline-tools" "$SDK_DIR/cmdline-tools/latest"
+
+          SDKMANAGER="$SDK_DIR/cmdline-tools/latest/bin/sdkmanager"
+
+          # Install semua komponen ke SDK_DIR kita sendiri
+          yes | $SDKMANAGER --sdk_root="$SDK_DIR" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
             "platform-tools" \
             "ndk;25.2.9519653"
 
-          # Verifikasi direktori ada
-          echo "=== platforms ===" && ls "$SDK_ROOT/platforms/"
-          echo "=== build-tools ===" && ls "$SDK_ROOT/build-tools/"
-          echo "=== ndk ===" && ls "$SDK_ROOT/ndk/"
+          # Verifikasi hasil install
+          echo "=== platforms ===" && ls "$SDK_DIR/platforms/"
+          echo "=== build-tools ===" && ls "$SDK_DIR/build-tools/"
+          echo "=== ndk ===" && ls "$SDK_DIR/ndk/"
 
-          # Set NDK root untuk cargo-apk
-          echo "ANDROID_NDK_ROOT=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
+          # Override env vars ke lokasi kita — ini yang dibaca cargo-apk
+          echo "ANDROID_HOME=$SDK_DIR"                          >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_DIR"                     >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$SDK_DIR/ndk/25.2.9519653"   >> $GITHUB_ENV
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
