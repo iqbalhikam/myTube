@@ -1,0 +1,60 @@
+[package]
+name = "noiklan"
+version = "1.0.0"
+edition = "2021"
+description = "YouTube tanpa iklan untuk Android, ditulis dalam Rust"
+license = "MIT"
+
+[lib]
+name = "noiklan"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "noiklan-desktop"
+path = "src/main.rs"
+
+[dependencies]
+eframe = { version = "0.27.2", default-features = false, features = ["glow", "default_fonts"] }
+egui = "0.27.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2.9", features = ["json"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+android-activity = { version = "0.5", features = ["native-activity"] }
+ndk-context = "0.1"
+jni = "0.21"
+winit = { version = "0.29", features = ["android-native-activity"] }
+
+[package.metadata.android]
+package = "com.noiklan.rust"
+build_targets = ["aarch64-linux-android"]
+apk_name = "NoIklan"
+label = "NoIklan"
+version_name = "1.0.0"
+version_code = 1
+min_sdk_version = 24
+target_sdk_version = 34
+
+[package.metadata.android.application]
+theme = "@android:style/Theme.DeviceDefault.NoActionBar"
+
+[package.metadata.android.application.activity]
+name = "android.app.NativeActivity"
+label = "NoIklan"
+launch_mode = "singleTop"
+orientation = "portrait"
+config_changes = "orientation|keyboardHidden|screenSize"
+
+[[package.metadata.android.application.activity.intent_filter]]
+actions = ["android.intent.action.MAIN"]
+categories = ["android.intent.category.LAUNCHER"]
+
+[package.metadata.android.application.activity.meta_data]
+"android.app.lib_name" = "noiklan"
+
+[[package.metadata.android.permission]]
+name = "android.permission.INTERNET"
+
+[[package.metadata.android.permission]]
+name = "android.permission.ACCESS_NETWORK_STATE"

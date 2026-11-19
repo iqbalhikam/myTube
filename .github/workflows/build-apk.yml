@@ -1,0 +1,93 @@
+name: Build & Release APK
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK r25c
+        run: |
+          echo "y" | sdkmanager "ndk;25.2.9519653" --sdk_root=$ANDROID_SDK_ROOT
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Cache Cargo registry & build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install cargo-apk
+        run: cargo install cargo-apk --locked
+
+      - name: Build APK (release)
+        run: cargo apk build --release
+        env:
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
+
+      - name: Cari file APK
+        id: find_apk
+        run: |
+          APK_PATH=$(find target -name "*.apk" | head -1)
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "APK ditemukan di: $APK_PATH"
+
+      - name: Upload APK sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NoIklan-APK
+          path: ${{ steps.find_apk.outputs.apk_path }}
+
+      - name: Buat GitHub Release & upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "NoIklan ${{ github.ref_name }}"
+          body: |
+            ## 📱 NoIklan ${{ github.ref_name }}
+            
+            Aplikasi YouTube tanpa iklan untuk Android, ditulis dalam Rust.
+            
+            ### Cara Install
+            1. Download file `NoIklan.apk` di bawah
+            2. Buka file APK di HP Android kamu
+            3. Izinkan install dari sumber tidak dikenal jika diminta
+            4. Install & nikmati YouTube tanpa iklan! 🎉
+            
+            ### Catatan
+            - Pemutaran video via Brave (ad-block native)
+            - Fallback ke browser default jika Brave tidak terpasang
+            - Min Android: 7.0 (API 24)
+          files: ${{ steps.find_apk.outputs.apk_path }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
