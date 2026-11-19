@@ -10,10 +10,6 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_NDK_VERSION: 25.2.9519653
-
     steps:
       - name: Checkout kode
         uses: actions/checkout@v4
@@ -24,16 +20,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install Android platform & NDK via sdkmanager
+      - name: Setup Android SDK & NDK
         run: |
-          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          echo "y" | $SDKMANAGER \
+          SDK_ROOT=/usr/local/lib/android/sdk
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+
+          # Install platform, build-tools, dan NDK
+          yes | $SDKMANAGER --sdk_root="$SDK_ROOT" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
             "platform-tools" \
-            "ndk;$ANDROID_NDK_VERSION"
-          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+            "ndk;25.2.9519653"
+
+          # Verifikasi platform berhasil diinstall
+          ls "$SDK_ROOT/platforms/"
+
+          # Export env vars — gunakan ANDROID_HOME (bukan SDK_ROOT yang deprecated)
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_ENV
+
+      - name: Unset ANDROID_SDK_ROOT (deprecated)
+        run: echo "ANDROID_SDK_ROOT=" >> $GITHUB_ENV
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -56,6 +63,9 @@ jobs:
 
       - name: Build APK (release)
         run: cargo apk build --release
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
 
       - name: Cari file APK
         id: find_apk
@@ -77,15 +87,15 @@ jobs:
           name: "NoIklan ${{ github.ref_name }}"
           body: |
             ## 📱 NoIklan ${{ github.ref_name }}
-            
+
             Aplikasi YouTube tanpa iklan untuk Android, ditulis dalam Rust.
-            
+
             ### Cara Install
             1. Download file `NoIklan.apk` di bawah
             2. Buka file APK di HP Android kamu
             3. Izinkan install dari sumber tidak dikenal jika diminta
             4. Install & nikmati YouTube tanpa iklan! 🎉
-            
+
             ### Catatan
             - Pemutaran video via Brave (ad-block native)
             - Fallback ke browser default jika Brave tidak terpasang
