@@ -9,10 +9,35 @@ Prasyarat: Rust, Android SDK + NDK, Java 17, `cargo-apk`.
 ```bash
 rustup target add aarch64-linux-android
 cargo install cargo-apk
-cargo apk build --release
+cargo apk build --release --lib
 ```
 
 APK dihasilkan di `target/release/apk/NoIklan.apk`.
+
+NDK harus mendukung API 34 (NDK r26+); cargo-apk membuang platform di luar rentang `NDK_MAX_PLATFORM_LEVEL` dan gagal dengan "Android SDK has no platforms installed".
+
+## Rilis APK (GitHub Actions)
+
+Workflow `.github/workflows/build-apk.yml` jalan saat push tag `v*.*.*`. Build release perlu keystore tetap agar update APK bisa menimpa versi lama, jadi siapkan dua secret repo:
+
+1. Buat keystore sekali (simpan `noiklan-release.jks` dan password-nya di tempat aman):
+
+   ```powershell
+   keytool -genkeypair -v -keystore noiklan-release.jks -alias noiklan `
+     -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. Ubah ke Base64 dan salin ke clipboard:
+
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("noiklan-release.jks")) | Set-Clipboard
+   ```
+
+3. Di GitHub: Settings > Secrets and variables > Actions, tambahkan:
+   - `KEYSTORE_BASE64` — isi clipboard dari langkah 2
+   - `KEYSTORE_PASSWORD` — password keystore
+
+Pakai keystore yang sama untuk semua rilis; jika diganti, pengguna harus uninstall sebelum install versi baru.
 
 ## Jalankan di desktop (preview)
 

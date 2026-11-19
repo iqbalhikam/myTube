@@ -33,22 +33,28 @@ jobs:
 
           SDKMANAGER="$SDK_DIR/cmdline-tools/latest/bin/sdkmanager"
 
-          # Install semua komponen ke SDK_DIR kita sendiri
+          # Install semua komponen ke SDK_DIR kita sendiri.
+          # NDK harus versi yang mendukung API 34 (NDK 25 hanya sampai API 33):
+          # cargo-apk membuang platform di luar rentang NDK_MIN..NDK_MAX_PLATFORM_LEVEL
+          # dan gagal dengan "Android SDK has no platforms installed".
           yes | $SDKMANAGER --sdk_root="$SDK_DIR" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
             "platform-tools" \
-            "ndk;25.2.9519653"
+            "ndk;26.3.11579264"
 
           # Verifikasi hasil install
           echo "=== platforms ===" && ls "$SDK_DIR/platforms/"
           echo "=== build-tools ===" && ls "$SDK_DIR/build-tools/"
           echo "=== ndk ===" && ls "$SDK_DIR/ndk/"
+          test -f "$SDK_DIR/platforms/android-34/android.jar" || {
+            echo "platform android-34 tidak terpasang — pastikan NDK mendukung API 34"; exit 1;
+          }
 
           # Override env vars ke lokasi kita — ini yang dibaca cargo-apk
           echo "ANDROID_HOME=$SDK_DIR"                          >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$SDK_DIR"                     >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$SDK_DIR/ndk/25.2.9519653"   >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$SDK_DIR/ndk/26.3.11579264"   >> $GITHUB_ENV
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -69,13 +75,32 @@ jobs:
       - name: Install cargo-apk
         run: cargo install cargo-apk --locked
 
+      - name: Siapkan keystore release
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "Secret KEYSTORE_BASE64 dan KEYSTORE_PASSWORD wajib diisi. Lihat README bagian Rilis APK." >&2
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
       - name: Build APK (release)
-        run: cargo apk build --release
+        env:
+          CARGO_APK_RELEASE_KEYSTORE: ${{ runner.temp }}/release.keystore
+          CARGO_APK_RELEASE_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: cargo apk build --release --lib
 
       - name: Cari file APK
         id: find_apk
         run: |
-          APK_PATH=$(find target -name "*.apk" | head -1)
+          APK_PATH="target/release/apk/NoIklan.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            echo "APK tidak ditemukan di $APK_PATH" >&2
+            ls -R target/release/apk || true
+            exit 1
+          fi
           echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
           echo "APK ditemukan di: $APK_PATH"
 

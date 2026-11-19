@@ -25,8 +25,11 @@ fn android_main(app: android_activity::AndroidApp) {
         let _ = DATA_DIR.set(p);
     }
     let options = eframe::NativeOptions {
-        android_app: Some(app),
         renderer: eframe::Renderer::Glow,
+        event_loop_builder: Some(Box::new(move |builder| {
+            use winit::platform::android::EventLoopBuilderExtAndroid;
+            builder.with_android_app(app);
+        })),
         ..Default::default()
     };
     eframe::run_native("NoIklan", options, Box::new(|cc| Box::new(app::NoIklanApp::new(cc)))).unwrap();
