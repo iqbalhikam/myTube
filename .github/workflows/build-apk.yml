@@ -24,11 +24,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install Android NDK via sdkmanager
+      - name: Install Android platform & NDK via sdkmanager
         run: |
           SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          echo "y" | $SDKMANAGER "ndk;$ANDROID_NDK_VERSION"
+          echo "y" | $SDKMANAGER \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "platform-tools" \
+            "ndk;$ANDROID_NDK_VERSION"
           echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
