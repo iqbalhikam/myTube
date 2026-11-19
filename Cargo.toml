@@ -33,6 +33,8 @@ apk_name = "NoIklan"
 label = "NoIklan"
 version_name = "1.0.0"
 version_code = 1
+
+[package.metadata.android.sdk]
 min_sdk_version = 24
 target_sdk_version = 34
 
@@ -50,11 +52,12 @@ config_changes = "orientation|keyboardHidden|screenSize"
 actions = ["android.intent.action.MAIN"]
 categories = ["android.intent.category.LAUNCHER"]
 
-[package.metadata.android.application.activity.meta_data]
-"android.app.lib_name" = "noiklan"
+[[package.metadata.android.application.activity.meta_data]]
+name = "android.app.lib_name"
+value = "noiklan"
 
-[[package.metadata.android.permission]]
+[[package.metadata.android.uses_permission]]
 name = "android.permission.INTERNET"
 
-[[package.metadata.android.permission]]
+[[package.metadata.android.uses_permission]]
 name = "android.permission.ACCESS_NETWORK_STATE"
