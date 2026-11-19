@@ -696,7 +696,8 @@ impl NoIklanApp {
                 ui.label(RichText::new(format!("{} dipilih", self.selected.len())).size(11.0).color(pal.muted));
                 if ui.button("Hapus terpilih").clicked() {
                     let old = pl.clone();
-                    if let Some(p) = self.playlist_mut(pid) { p.ids.retain(|id| !self.selected.contains(id)); }
+                    let selected = self.selected.clone();
+                    if let Some(p) = self.playlist_mut(pid) { p.ids.retain(|id| !selected.contains(id)); }
                     self.selected.clear();
                     self.mark();
                     self.toast_undo("Video dihapus dari playlist", UndoAction::RestorePlaylist(old));

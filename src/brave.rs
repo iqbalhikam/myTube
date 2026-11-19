@@ -4,9 +4,9 @@ pub fn open_url(url: &str, preferred: &str) -> Result<String, String> {
     use jni::JNIEnv;
 
     let ctx = ndk_context::android_context();
-    let vm = unsafe { jni::JavaVM::from_raw(ctx.java_vm as *mut jni::sys::JavaVM) }.map_err(|e| e.to_string())?;
+    let vm = unsafe { jni::JavaVM::from_raw(ctx.vm() as *mut jni::sys::JavaVM) }.map_err(|e| e.to_string())?;
     let mut env = vm.attach_current_thread_permanently().map_err(|e| e.to_string())?;
-    let activity = unsafe { JObject::from_raw(ctx.context as jni::sys::jobject) };
+    let activity = unsafe { JObject::from_raw(ctx.context() as jni::sys::jobject) };
 
     fn try_start(env: &mut JNIEnv<'_>, activity: &JObject<'_>, url: &str, pkg: Option<&str>) -> Result<(), String> {
         let url_j = env.new_string(url).map_err(|e| e.to_string())?;
