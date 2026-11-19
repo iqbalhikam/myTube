@@ -108,6 +108,8 @@ pub struct NoIklanApp {
     selected: HashSet<String>,
     lib_search: String,
     lib_sort: String,
+    safe_top: f32,
+    safe_bottom: f32,
 }
 
 impl NoIklanApp {
@@ -151,6 +153,8 @@ impl NoIklanApp {
             selected: HashSet::new(),
             lib_search: String::new(),
             lib_sort: "Urutan".into(),
+            safe_top: 0.0,
+            safe_bottom: 0.0,
         };
         app.start_feed();
         app
@@ -573,8 +577,8 @@ impl NoIklanApp {
 
     fn top_home(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::top("top")
-            .exact_height(52.0)
-            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 14.0, right: 6.0, top: 10.0, bottom: 4.0 }))
+            .exact_height(52.0 + self.safe_top)
+            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 14.0, right: 6.0, top: 10.0 + self.safe_top, bottom: 4.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     let (r, _) = ui.allocate_exact_size(vec2(32.0, 22.0), Sense::hover());
@@ -609,8 +613,8 @@ impl NoIklanApp {
 
     fn top_back(&mut self, ctx: &egui::Context, pal: &Pal, title: &str, subtitle: Option<&str>) {
         egui::TopBottomPanel::top("top")
-            .exact_height(52.0)
-            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0, bottom: 4.0 }))
+            .exact_height(52.0 + self.safe_top)
+            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0 + self.safe_top, bottom: 4.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     if icon_btn(ui, icons::ARROW_BACK, 22.0, pal.ink).clicked() {
@@ -628,8 +632,8 @@ impl NoIklanApp {
 
     fn top_search(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::top("top")
-            .exact_height(56.0)
-            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0, bottom: 6.0 }))
+            .exact_height(56.0 + self.safe_top)
+            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 6.0, right: 8.0, top: 10.0 + self.safe_top, bottom: 6.0 }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     if icon_btn(ui, icons::ARROW_BACK, 22.0, pal.ink).clicked() {
@@ -665,8 +669,8 @@ impl NoIklanApp {
 
     fn bottom_nav(&mut self, ctx: &egui::Context, pal: &Pal) {
         egui::TopBottomPanel::bottom("nav")
-            .exact_height(58.0)
-            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 0.0, right: 0.0, top: 4.0, bottom: 2.0 }))
+            .exact_height(58.0 + self.safe_bottom)
+            .frame(Frame::none().fill(pal.bg).inner_margin(Margin { left: 0.0, right: 0.0, top: 4.0, bottom: 2.0 + self.safe_bottom }))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = 0.0;
@@ -1531,7 +1535,7 @@ impl NoIklanApp {
             self.dialog = Some(Dialog::ConfirmClear);
         }
         ui.add_space(20.0);
-        ui.label(RichText::new("NoIklan v1.0.4 • Rust + egui").size(11.0).color(pal.muted));
+        ui.label(RichText::new("NoIklan v1.0.5 • Rust + egui").size(11.0).color(pal.muted));
         ui.label(RichText::new("Bukan aplikasi resmi YouTube. Video diputar di Brave.").size(11.0).color(pal.muted));
         ui.add_space(20.0);
     }
@@ -1824,6 +1828,11 @@ impl eframe::App for NoIklanApp {
         }
         self.apply_style(ctx);
         let pal = self.pal();
+        if let Some((top, bottom)) = crate::system_insets() {
+            let ppp = ctx.pixels_per_point().max(0.5);
+            self.safe_top = (top / ppp).ceil();
+            self.safe_bottom = (bottom / ppp).ceil();
+        }
         let screen = self.screen.clone();
         match screen {
             Screen::Tabs => {

@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::io::Read;
 use std::time::Duration;
 
-const UA: &str = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36";
+const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 const PALETTE: [[u8; 3]; 6] = [[255, 45, 77], [46, 155, 255], [124, 92, 255], [255, 176, 32], [34, 229, 132], [25, 211, 218]];
 
 pub fn thumb_url(id: &str) -> String {
@@ -201,9 +201,13 @@ fn page(url: &str) -> Result<Vec<Video>, String> {
     Ok(out)
 }
 
+fn search_html(q: &str) -> Result<Vec<Video>, String> {
+    let url = format!("https://www.youtube.com/results?search_query={}&hl=id&gl=ID&persist_gl=1", encode(q));
+    page(&url)
+}
+
 pub fn search(q: &str) -> Result<Vec<Video>, String> {
-    let url = format!("https://www.youtube.com/results?search_query={}&hl=id&gl=ID", encode(q));
-    let mut v = page(&url)?;
+    let mut v = search_html(q)?;
     if v.is_empty() {
         return Err("YouTube tidak mengembalikan hasil untuk kata kunci ini".into());
     }
@@ -212,13 +216,33 @@ pub fn search(q: &str) -> Result<Vec<Video>, String> {
 }
 
 pub fn trending() -> Result<Vec<Video>, String> {
-    let url = "https://www.youtube.com/feed/trending?hl=id&gl=ID&persist_gl=1";
-    let mut v = page(url)?;
-    if v.is_empty() {
-        return Err("Beranda YouTube tidak bisa dibaca".into());
+    // Beranda anonim YouTube kini kosong tanpa login; susun feed dari
+    // pencarian topik populer agar tetap berisi video nyata.
+    const QUERIES: [&str; 3] = ["trending indonesia hari ini", "musik indonesia terbaru", "video viral indonesia"];
+    let mut sets: Vec<Vec<Video>> = Vec::new();
+    let mut last_err: Option<String> = None;
+    std::thread::scope(|s| {
+        let handles: Vec<_> = QUERIES.iter().map(|q| s.spawn(move || search_html(q))).collect();
+        for h in handles {
+            match h.join() {
+                Ok(Ok(v)) => sets.push(v),
+                Ok(Err(e)) => last_err = Some(e),
+                Err(_) => last_err = Some("Gagal memuat YouTube".into()),
+            }
+        }
+    });
+    let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    for v in sets.into_iter().flatten() {
+        if seen.insert(v.id.clone()) {
+            out.push(v);
+        }
     }
-    v.truncate(40);
-    Ok(v)
+    if out.is_empty() {
+        return Err(last_err.unwrap_or_else(|| "YouTube tidak mengembalikan hasil".into()));
+    }
+    out.truncate(40);
+    Ok(out)
 }
 
 pub fn fetch_thumb(url: &str) -> Result<(usize, usize, Vec<u8>), String> {
