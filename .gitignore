@@ -1,3 +1,7 @@
 /target
 Cargo.lock
 *.apk
+.release-keystore/
+*.jks
+*.p12
+*.keystore
