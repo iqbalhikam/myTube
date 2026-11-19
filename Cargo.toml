@@ -1,6 +1,6 @@
 [package]
 name = "noiklan"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 description = "YouTube tanpa iklan untuk Android, ditulis dalam Rust"
 license = "MIT"
@@ -71,12 +71,3 @@ name = "com.brave.browser_beta"
 
 [[package.metadata.android.queries.package]]
 name = "com.brave.browser_nightly"
-
-[[package.metadata.android.queries.intent]]
-actions = ["android.intent.action.VIEW"]
-
-[[package.metadata.android.queries.intent.data]]
-scheme = "https"
-
-[[package.metadata.android.queries.intent.data]]
-scheme = "http"
